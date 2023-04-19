@@ -5,6 +5,8 @@ yb = [1008, 2500, 1760];
 la = [60, 75, 42];
 lb = [45, 88, 57];
 
+x_guess = [];
+y_guess = [];
 xrot = [];
 yrot = [];
 fel = [];
@@ -28,19 +30,13 @@ ystart = [1000; 2500; 1760];
 
 for i = 1:3
     
-    Xa = xa(i);
-    Xb = xb(i);
-    Ya = ya(i);
-    Yb = yb(i);
-    La = la(i);
-    Lb = lb(i);
     Xstart = xstart(i);
     Ystart = ystart(i); 
 
-    f = @(x,y) ((x-Xa).^2 + (y-Ya).^2 - La.^2);
-    g = @(x,y) ((x-Xb).^2 + (y-Yb).^2 - Lb.^2);
+    f = @(x,y) ((x-xa(i)).^2 + (y-ya(i)).^2 - la(i).^2);
+    g = @(x,y) ((x-xb(i)).^2 + (y-yb(i)).^2 - lb(i).^2);
 
-    J =@(x,y) [2.*(x-Xa) 2.*(y-Ya); 2.*(x-Xb) 2.*(y-Yb)];
+    J =@(x,y) [2.*(x-xa(i)) 2.*(y-ya(i)); 2.*(x-xb(i)) 2.*(y-yb(i))];
 
     dx = [1,1];
 
@@ -54,6 +50,9 @@ for i = 1:3
 
         Xstart = Xstart + h(1);
         Ystart = Ystart + h(2);
+
+        x_guess = [x_guess, Xstart];
+        y_guess = [y_guess, Ystart];
     end
 
     xrot = [xrot, Xstart];
@@ -70,6 +69,22 @@ hold on
     plot(1020, 0, "o");
 
 hold off
+
+%konvergens
+% --------------------
+
+x_diff = abs(x_guess(2:end)-x_guess(1:end-1));
+y_diff = abs(y_guess(2:end)-y_guess(1:end-1));
+
+x_kon = abs(x_diff(2:end))./abs((x_diff(1:end-1))).^2;
+y_kon = abs(y_diff(2:end))./abs((y_diff(1:end-1))).^2;
+
+iter = [1:1:15]';
+
+x_list = x_kon';
+y_list = y_kon';
+
+disp([iter, x_list, y_list])
 
 % fråga a
 % --------------------
@@ -115,29 +130,27 @@ plot(u, p(u));
 
 hold off
 
-%xdiff = abs(fel(2:end)-fel(1:end-1));
-
-% normfel = sqrt(sum(fel.^2));
-% disp(normfel)
-% kon = abs(normfel(2:end)-normfel(1:end-1)); 
 
 % längd av väg
 % ------------------------
 
 a = 0;
 b = 1020;
+n_int = [100 200 400];
 
-n_int = 1000;
+intvalues = [];
 
-t = linspace(a,b,n_int+1);
-step_length = (b-a)/n_int;
-
-L = 0;
-
-for j = 1:n
-    L = L + (p(x(j)) + p(x(j+1)))/2*step_length;
+for w = n_int
+    h1 = (b-a)/w;
+    t1 = a:h1:b;
+    TSim = (h1/2)*(2*(sum(p(t1(2:end-1)))) + p(t1(1)) + p(t1(end)));
+    intvalues = [intvalues, TSim];
 end
 
-disp(L)
+nog = log2(abs(intvalues(2)-intvalues(1))/abs(intvalues(3)-intvalues(2)));
+
+disp("Längden för vägen är : " + TSim/1000 + " kilometer")
+disp("Trapetsregeln har noggranhetsordning: " + round(nog))
+
 
 
