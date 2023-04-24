@@ -13,11 +13,11 @@ fel = [];
 
 for n = 1:3
 
-    [x,y] = cir(xa(n), ya(n), la(n));
+    [x,y] = boll(xa(n), ya(n), la(n));
     plot(x,y)
     %axis("equal");
     hold on
-    [x,y] = cir(xb(n), yb(n), lb(n));
+    [x,y] = boll(xb(n), yb(n), lb(n));
     plot(x,y);
 
 end
@@ -138,19 +138,26 @@ a = 0;
 b = 1020;
 n_int = [100 200 400];
 
+p_length = @(x) sqrt(1 + (k(2) + 2.*k(3).*x + 3.*k(4).*x.^2 + 4.*k(5).*x.^3).^2);
+
 intvalues = [];
 
 for w = n_int
     h1 = (b-a)/w;
     t1 = a:h1:b;
-    TSim = (h1/2)*(2*(sum(p(t1(2:end-1)))) + p(t1(1)) + p(t1(end)));
+    TSim = (h1/2)*(2*(sum(p_length(t1(2:end-1)))) + p_length(t1(1)) + p_length(t1(end)));
     intvalues = [intvalues, TSim];
 end
 
 nog = log2(abs(intvalues(2)-intvalues(1))/abs(intvalues(3)-intvalues(2)));
 
-disp("Längden för vägen är : " + TSim/1000 + " kilometer")
+disp("Längden för vägen är : " + round(TSim/1000, 2) + " kilometer")
 disp("Trapetsregeln har noggranhetsordning: " + round(nog))
+
+
+%-----------------------
+
+
 
 
 
